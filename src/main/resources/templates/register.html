@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>注册</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="Shortcut Icon" href="https://s1.ax1x.com/2020/03/27/GPH9xO.png" type="image/png" />
+    <!--[if lt IE 9]>
+    <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body style="margin-top:50px;">
+<div class="container">
+    <h1>注册</h1>
+    <div th:if="${param.nullname}" class="alert alert-danger alert-dismissable">
+        请输入用户名。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.duplicate}" class="alert alert-danger alert-dismissable">
+        注册失败:用户名已存在。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.confirm}" class="alert alert-danger alert-dismissable">
+        注册失败:两次输入的密码不同。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.length}" class="alert alert-danger alert-dismissable">
+        注册失败:密码必须在八位及以上。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.question}" class="alert alert-danger alert-dismissable">
+        请输入密保问题（找回密码时要求回答的问题，例如：我的小学校名、我最喜欢的颜色）。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.answer}" class="alert alert-danger alert-dismissable">
+        请输入密保问题的答案。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.captcha}" class="alert alert-danger alert-dismissable">
+        注册失败:验证码错误。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.expired}" class="alert alert-danger alert-dismissable">
+        注册失败:验证码已过期(5分钟)。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <form action role="form" class="form-horizontal" method="post" th:action="@{/regentry}">
+        <div class="form-group">
+            <label for="username">用户名:</label>
+            <input type="text" name="username" id="username" class="form-control" placeholder="请输入用户名"/>
+        </div>
+        <div class="form-group">
+            <label for="password">密码:</label>
+            <input type="password" name="password" id="password" class="form-control" placeholder="请输入密码"/>
+        </div>
+        <div class="form-group">
+            <label for="confirm">确认密码:</label>
+            <input type="password" name="confirm" id="confirm" class="form-control" placeholder="请再次输入密码"/>
+        </div>
+        <div class="form-group">
+            <label for="question">密保问题:</label>
+            <input type="text" name="question" id="question" class="form-control" placeholder="请输入密保问题"/>
+        </div>
+        <div class="form-group">
+            <label for="answer">答案:</label>
+            <input type="text" name="answer" id="answer" class="form-control" placeholder="请输入答案"/>
+        </div>
+        <div class="form-group">
+            <label for="captcha">验证码:</label>
+            <a href="javascript:loadCaptcha();">
+                <img src="" id="captcha-img" alt="加载中..."/>
+            </a>
+            <input type="text" name="captcha" id="captcha" class="form-control" placeholder="请输入图片中的验证码"/>
+        </div>
+        <div style="display:none;">
+            <label for="id">验证码id:</label>
+            <input type="text" name="id" id="id" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <input type="submit" class="form-control" value="注册"/>
+        </div>
+    </form>
+    <script type="text/javascript">
+        function loadCaptcha(){
+            var request=new XMLHttpRequest();
+            request.open("get","captcha");
+            request.send();
+            request.onreadystatechange=function(){
+                if(request.readyState==4&&request.status==200){
+                    var response=request.responseText;
+                    var split=response.split("#");
+                    document.getElementById("id").setAttribute("value",split[0]);
+                    document.getElementById("captcha-img").setAttribute("src","data:image/png;base64,"+split[1]);
+                }
+            };
+        }
+        window.onload=loadCaptcha();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+</div>
+</body>
+</html>

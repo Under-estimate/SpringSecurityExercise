@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>找回密码</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="Shortcut Icon" href="https://s1.ax1x.com/2020/03/27/GPH9xO.png" type="image/png" />
+    <!--[if lt IE 9]>
+    <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body style="margin-top:50px;">
+<div class="container">
+    <h1>找回密码 Step2</h1>
+    <div th:if="${param.wrong}" class="alert alert-danger alert-dismissable">
+        密保问题回答错误。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.equal}" class="alert alert-danger alert-dismissable">
+        新密码不能和旧密码相同。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.length}" class="alert alert-danger alert-dismissable">
+        新密码长度必须大于等于8。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div class="jumbotron">
+        您的密保问题是:
+        <span id="question">[获取失败]</span>
+    </div>
+    <form role="form" class="form-horizontal" method="post" th:action="@{/resetpass}">
+        <div style="display:none;">
+            <label for="username">用户名:</label>
+            <input type="text" name="username" id="username" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label for="answer">密保问题答案:</label>
+            <input type="text" name="answer" id="answer" class="form-control" placeholder="密保问题答案"/>
+        </div>
+        <div class="form-group">
+            <label for="password">新密码:</label>
+            <input type="password" name="password" id="password" class="form-control" placeholder="新密码"/>
+        </div>
+        <div class="form-group">
+            <label for="confirm">确认新密码:</label>
+            <input type="password" name="confirm" id="confirm" class="form-control" placeholder="确认密码"/>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="重置密码" class="form-control"/>
+        </div>
+    </form>
+    <script type="text/javascript">
+        function getPar(par){
+            var local_url = document.location.href;
+            var get = local_url.indexOf(par +"=");
+            if(get == -1){
+                return false;
+            }
+            var get_par = local_url.slice(par.length + get + 1);
+            var nextPar = get_par.indexOf("&");
+            if(nextPar != -1){
+                get_par = get_par.slice(0, nextPar);
+            }
+            return get_par;
+        }
+        document.getElementById("question").innerHTML=unescape(getPar("question"));
+        document.getElementById("username").setAttribute("value",unescape(getPar("username")));
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+</div>
+</body>
+</html>
