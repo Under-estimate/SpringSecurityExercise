@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人信息</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="Shortcut Icon" href="https://s1.ax1x.com/2020/03/27/GPH9xO.png" type="image/png" />
+    <!--[if lt IE 9]>
+    <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body style="margin-top:50px;">
+<div class="container">
+    <h1>个人信息</h1>
+    <div th:if="${param.invalidavatar}" class="alert alert-danger alert-dismissable">
+        头像格式不支持。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.avatar}" class="alert alert-success alert-dismissable">
+        头像设置成功。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.information}" class="alert alert-success alert-dismissable">
+        信息保存成功。
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <a class="btn btn-default" href="secured">返回个人中心</a>
+    <div>
+        <div id="avatar">
+            加载中...
+        </div>
+        <form role="form" class="form-horizontal" method="post" enctype="multipart/form-data" th:action="@{/uploadavatar}">
+            <div class="form-group">
+                <label for="image">选择头像</label>
+                <input type="file" name="image" id="image" class="form-control" required="required" accept="image/*"/>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="form-control" value="更换头像"/>
+            </div>
+        </form>
+    </div>
+    <hr />
+    <form role="form" class="form-horizontal" method="post" th:action="@{/setinfo}">
+        <div class="form-group">
+            <label for="birthday">生日:</label>
+            <input type="date" name="birthday" id="birthday" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label for="gender">性别:</label>
+            <select id="gender" name="gender" class="form-control">
+                <option>未指定</option>
+                <option>男</option>
+                <option>女</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">简介:</label>
+            <textarea name="description" id="description" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+            <input type="submit" class="form-control" value="更新个人信息"/>
+        </div>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+    <script>
+        let csrf=document.getElementsByName("_csrf")[0].value;
+        $.ajax({
+            type:"POST",
+            url:"getcurrentusername",
+            data:{
+                "_csrf":csrf
+            },
+            success:function(data){
+                document.getElementById("avatar").innerHTML="<img width='100px' height='100px' src=\"getavatar?username="+data+"\" alt=\"头像\"/>"
+                $.ajax({
+                    type:"POST",
+                    url:"getuser",
+                    data:{
+                        "username":data,
+                        "_csrf":csrf
+                    },
+                    success:function(data){
+                        let userinfo=eval("("+data+")");
+                        console.log(userinfo);
+                        if(userinfo.user.birthday!="null")document.getElementById("birthday").value=userinfo.user.birthday;
+                        document.getElementById("gender").value=userinfo.user.gender;
+                        document.getElementById("description").value=userinfo.user.desc;
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

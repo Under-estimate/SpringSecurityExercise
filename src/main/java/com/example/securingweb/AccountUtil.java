@@ -3,16 +3,17 @@ package com.example.securingweb;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Base64;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 @Controller
 public class AccountUtil {
@@ -89,5 +90,83 @@ public class AccountUtil {
         Utils.users.put(target.username,target);
         Utils.saveUsers();
         return "redirect:/redirect?target=login&tip="+Utils.encodeChineseForTip("重置密码成功，正在跳转至登陆界面...");
+    }
+    @PostMapping("/uploadUpdate")
+    public String uploadUpdate(@RequestParam(name="app") String app,
+                               @RequestParam(name="file")MultipartFile file,
+                               HttpServletRequest request){
+        MyUser target= Utils.users.get(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(!target.username.equals("admin"))
+            return "redirect:/error";
+        File f=new File(app);
+        if(!f.isDirectory())
+            f.mkdirs();
+        else{
+            File[] list=f.listFiles();
+            if(list!=null)
+                for(File fx:list)
+                    fx.delete();
+        }
+        f=new File(f,file.getOriginalFilename()).getAbsoluteFile();
+
+        try {
+            file.transferTo(f);
+        }catch (Exception e){
+            e.printStackTrace();
+            return "redirect:/manage?error";
+        }
+        GregorianCalendar gc=new GregorianCalendar();
+        String time=(gc.get(Calendar.MONTH)+1)+"."+gc.get(Calendar.DAY_OF_MONTH)+" "+gc.get(Calendar.HOUR_OF_DAY)+":"+gc.get(Calendar.MINUTE)+":"+gc.get(Calendar.SECOND);
+        System.out.println("["+time+"]["+request.getHeader("X-Forwarded-For")+"]Upload update:"+app+">>>"+file.getOriginalFilename());
+        return "redirect:/manage?success";
+    }
+    @PostMapping("/uploadavatar")
+    public String uploadAvatar(@RequestParam(name="image")MultipartFile file){
+        MyUser target= Utils.users.get(SecurityContextHolder.getContext().getAuthentication().getName());
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(file.getBytes());
+            BufferedImage bi= ImageIO.read(bis);
+            target.info.avatar=new SerializableImage(bi);
+        }catch (Exception e){
+            return "redirect:/information?invalidavatar";
+        }
+        return "redirect:/information?avatar";
+    }
+    @PostMapping("/setinfo")
+    public String setInfo(@RequestParam(name="birthday") String birthday,
+                          @RequestParam(name="gender") String gender,
+                          @RequestParam(name="description") String desc){
+        MyUser target= Utils.users.get(SecurityContextHolder.getContext().getAuthentication().getName());
+        target.info.birthday=birthday;
+        target.info.gender=gender.equalsIgnoreCase("男")? MyUser.Gender.MALE:
+                gender.equalsIgnoreCase("女")? MyUser.Gender.FEMALE:
+                        MyUser.Gender.UNSPECIFIED;
+        target.info.description=desc;
+        Utils.saveUsers();
+        return "redirect:/information?information";
+    }
+    @PostMapping("/submitarticle")
+    public String submitArticle(@RequestParam(name="title")String title,
+                                @RequestParam(name="content")String content,
+                                @RequestParam(name="edit")boolean edit,
+                                @RequestParam(name="article",required = false)int article){
+        MyUser target= Utils.users.get(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(edit){
+            if(article<0||article>=target.articles.size())
+                return "redirect:/error";
+            Article a=target.articles.get(article);
+            a.content=content;
+            a.title=title;
+            a.time=System.currentTimeMillis();
+            Utils.saveUsers();
+            return "redirect:/blog?modified&type=list";
+        }else {
+            Article a = new Article();
+            a.title = title;
+            a.content = content;
+            target.articles.add(a);
+            Utils.saveUsers();
+            return "redirect:/blog?created&type=list";
+        }
     }
 }

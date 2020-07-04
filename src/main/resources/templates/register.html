@@ -74,30 +74,30 @@
     <form action role="form" class="form-horizontal" method="post" th:action="@{/regentry}">
         <div class="form-group">
             <label for="username">用户名:</label>
-            <input type="text" name="username" id="username" class="form-control" placeholder="请输入用户名"/>
+            <input type="text" name="username" id="username" required="required" class="form-control" placeholder="请输入用户名"/>
         </div>
         <div class="form-group">
             <label for="password">密码:</label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="请输入密码"/>
+            <input type="password" name="password" id="password" required="required" class="form-control" placeholder="请输入密码"/>
         </div>
         <div class="form-group">
             <label for="confirm">确认密码:</label>
-            <input type="password" name="confirm" id="confirm" class="form-control" placeholder="请再次输入密码"/>
+            <input type="password" name="confirm" id="confirm" required="required" class="form-control" placeholder="请再次输入密码"/>
         </div>
         <div class="form-group">
             <label for="question">密保问题:</label>
-            <input type="text" name="question" id="question" class="form-control" placeholder="请输入密保问题"/>
+            <input type="text" name="question" id="question" required="required" class="form-control" placeholder="请输入密保问题"/>
         </div>
         <div class="form-group">
             <label for="answer">答案:</label>
-            <input type="text" name="answer" id="answer" class="form-control" placeholder="请输入答案"/>
+            <input type="text" name="answer" id="answer" required="required" class="form-control" placeholder="请输入答案"/>
         </div>
         <div class="form-group">
             <label for="captcha">验证码:</label>
             <a href="javascript:loadCaptcha();">
                 <img src="" id="captcha-img" alt="加载中..."/>
             </a>
-            <input type="text" name="captcha" id="captcha" class="form-control" placeholder="请输入图片中的验证码"/>
+            <input type="text" name="captcha" id="captcha" required="required" class="form-control" placeholder="请输入图片中的验证码"/>
         </div>
         <div style="display:none;">
             <label for="id">验证码id:</label>

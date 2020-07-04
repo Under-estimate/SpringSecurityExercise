@@ -19,6 +19,7 @@ public class Utils {
     public static InMemoryUserDetailsManager manager;
     public static final String captchaWords="ACEFGHJKLMNPQRTUVWXY34679";
     public static final Color[] captchaColors={new Color(0,0,0),new Color(0,0,100),new Color(100,0,0),new Color(0,100,0)};
+    @SuppressWarnings("unchecked")
     public static void loadUsers(){
         if(!data.exists()){
             users= Collections.synchronizedMap(new HashMap<>());
@@ -54,6 +55,11 @@ public class Utils {
     public static void putUser(String username,String password,String question,String answer){
         users.put(username,new MyUser(username,new BCryptPasswordEncoder().encode(password),question,new BCryptPasswordEncoder().encode(answer)));
         manager.createUser(User.builder().username(username).password(new BCryptPasswordEncoder().encode(password)).roles("USER").build());
+        saveUsers();
+    }
+    public static void removeUser(String username){
+        users.remove(username);
+        manager.deleteUser(username);
         saveUsers();
     }
     public static String encodeChineseForTip(String text){

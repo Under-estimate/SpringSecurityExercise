@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inspirion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="Shortcut Icon" href="https://s1.ax1x.com/2020/03/27/GPH9xO.png" type="image/png" />
+    <!--[if lt IE 9]>
+    <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+        .hidden{
+            display: none;
+            -webkit-transition:all 1s;
+            transition:1s;
+        }
+        .shown{
+            display: block;
+            -webkit-transition:all 1s;
+            transition:1s;
+        }
+        .card{
+            border-radius: 50px;
+            background: #ffffff;
+            box-shadow:  20px 20px 50px #adadad,
+            -20px -20px 50px #ffffff;
+            margin:20px;
+            padding:20px;
+        }
+        a.title{
+            font-weight: bolder;
+            font-size: 30px;
+            text-decoration: none;
+        }
+        a.author{
+            text-decoration: none;
+        }
+        a.title:link{
+            color:black;
+        }
+        a.title:visited{
+            color:black;
+        }
+        a.title:hover{
+            color:blue;
+        }
+        a.title:active{
+            color:cyan;
+        }
+        a.author:link{
+            color:gray;
+        }
+        a.author:visited{
+            color:gray;
+        }
+        a.author:hover{
+            color:blue;
+        }
+        a.author:active{
+            color:cyan;
+        }
+    </style>
+</head>
+<body style="margin-top:50px;">
+<form style="display:none;" method="post" th:action="@{/getcurrentusername}">
+    <input type="submit" value="_"/>
+</form>
+<div class="container">
+    <a class="btn btn-default" href="secured">返回个人中心</a>
+    <span id="link_list">加载中...</span>
+    <h1>Inspirion</h1>
+    <div th:if="${param.created}" class="alert alert-success alert-dismissable">
+        文章创建成功!
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.modified}" class="alert alert-success alert-dismissable">
+        文章修改成功!
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div th:if="${param.deleted}" class="alert alert-success alert-dismissable">
+        文章删除成功!
+        <button type="button" class="close" data-dismiss="alert"
+                aria-hidden="true">
+            &times;
+        </button>
+    </div>
+    <div id="bloglist" class="hidden">
+        加载中...
+    </div>
+    <div id="blogdetail" class="hidden">
+        <h2 id="detail_title">
+            加载中...
+        </h2>
+        <div style="color:gray" id="detail_status">
+            加载中...
+        </div>
+        <div id="detail_author_toolbar">
+            <button class="btn btn-primary" onclick="modify()">修改</button>
+            <button class="btn btn-danger" onclick="del()">删除</button>
+        </div>
+        <p id="detail_body">
+            加载中...
+        </p>
+        <button class="btn btn-success" id="detail_like" onclick="like()">加载中...</button>
+        <button class="btn btn-danger" id="detail_dislike" onclick="dislike()">加载中...</button>
+    </div>
+    <div id="viewuser" class="hidden">
+        <div id="user_avatar">
+            加载中...
+        </div>
+        <p id="user_name">
+            加载中...
+        </p>
+        <p id="user_gender">
+            加载中...
+        </p>
+        <p id="user_birthday">
+            加载中...
+        </p>
+        <p id="user_description">
+            加载中...
+        </p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    function getPar(par){
+        var local_url = document.location.href;
+        var get = local_url.indexOf(par +"=");
+        if(get === -1){
+            return false;
+        }
+        var get_par = local_url.slice(par.length + get + 1);
+        var nextPar = get_par.indexOf("&");
+        if(nextPar !== -1){
+            get_par = get_par.slice(0, nextPar);
+        }
+        return get_par;
+    }
+    var user,article;
+    function loadContent(){
+        let type=getPar("type");
+        if(type==="list"){
+            document.getElementById("bloglist").className="shown";
+            if(getPar("user"))
+                user=getPar("user");
+            else
+                user=username;
+            $.ajax({
+                method:"POST",
+                url:"getlist",
+                data:{
+                    "_csrf":csrf,
+                    "author":user
+                },
+                success:function(data){
+                    var list=eval("("+data+")");
+                    if(list.state!=="success")
+                        window.location.href="error";
+                    list=list.articles;
+                    var htmlcode="<h2><a class='title' href='blog?type=user&user="+user+"'>"+user+"</a>的文章</h2>";
+                    for(var a in list){
+                        article=list[a];
+                        htmlcode+="<div class='card'><a href='blog?type=detail&user="+user+"&article="+article.num+"' class='title'>"+article.title+"</a><br />"+article.time+"&nbsp;&nbsp;&nbsp;浏览数:"+article.view+"</div>";
+                    }
+                    document.getElementById("bloglist").innerHTML=htmlcode;
+                }
+            });
+        }
+        else if(type==="detail"){
+            document.getElementById("blogdetail").className="shown";
+            if(getPar("user"))
+                user=getPar("user");
+            else
+                window.location.href="error";
+            if(user!==username&&username!=="admin")
+                document.getElementById("detail_author_toolbar").innerHTML="";
+            if(getPar("article"))
+                article=getPar("article");
+            else
+                window.location.href="error";
+            $.ajax({
+                method:"POST",
+                url:"getarticle",
+                data:{
+                    "_csrf":csrf,
+                    "username":user,
+                    "article":article
+                },
+                success:function(data){
+                    data=data.replace(/\r\n/g,"<br />");
+                    var detail=eval("("+data+")");
+                    if(detail.state!=="success")
+                        window.location.href="error";
+                    detail=detail.article;
+                    document.getElementById("detail_title").innerHTML=detail.title;
+                    document.getElementById("detail_body").innerHTML=detail.content;
+                    document.getElementById("detail_status").innerHTML="作者:<a class='author' href='blog?type=user&username="+user+"'>"+user+"</a>&nbsp;&nbsp;&nbsp;时间:"+detail.time+"&nbsp;&nbsp;&nbsp;浏览数:"+detail.view;
+                    document.getElementById("detail_like").innerHTML="赞("+detail.likes+")";
+                    document.getElementById("detail_dislike").innerHTML="踩("+detail.dislikes+")";
+                    $.ajax({
+                        method:"POST",
+                        url:"addview",
+                        data:{
+                            "_csrf":csrf,
+                            "author":user,
+                            "article":article
+                        }
+                    })
+                }
+            });
+        }
+        else if(type==="user"){
+            document.getElementById("viewuser").className="shown";
+            if(getPar("user"))
+                user=getPar("user");
+            else
+                window.location.href="error";
+            $.ajax({
+                method:"POST",
+                url:"getuser",
+                data:{
+                    "_csrf":csrf,
+                    "username":user
+                },
+                success:function (data) {
+                    var userinfo=eval("("+data+")");
+                    if(userinfo.state!=="success")
+                        window.location.href="error";
+                    userinfo=userinfo.user;
+                    document.getElementById("user_avatar").innerHTML="<img width='100px' height='100px' src='getavatar?username="+user+"'/>";
+                    document.getElementById("user_birthday").innerHTML="生日:"+userinfo.birthday;
+                    document.getElementById("user_description").innerHTML="个人简介:"+userinfo.desc;
+                    document.getElementById("user_gender").innerHTML="性别:"+userinfo.gender;
+                    document.getElementById("user_name").innerHTML=user;
+                }
+            });
+        }
+    }
+    var username;
+    let csrf=document.getElementsByName("_csrf")[0].value;
+    $.ajax({
+        method:"POST",
+        url:"getcurrentusername",
+        data:{
+            "_csrf":csrf
+        },
+        success:function(data){
+            username=data;
+            loadContent();
+            document.getElementById("link_list").innerHTML="<a href='blog?type=list&user="+user+"' class='btn btn-primary'>查看此用户的所有博客</a>";
+        }
+    });
+    function like(){
+        $.ajax({
+            method:"POST",
+            url:"like",
+            data:{
+                "_csrf":csrf,
+                "target":user,
+                "article":article
+            },
+            success:function(data){
+                let feedback=eval("("+data+")");
+                if(feedback.state==="success"){
+                    $.ajax({
+                        method:"POST",
+                        url:"getarticle",
+                        data:{
+                            "_csrf":csrf,
+                            "username":user,
+                            "article":article
+                        },
+                        success:function(data){
+                            data=data.replace(/\r\n/g,"<br />");
+                            var detail=eval("("+data+")");
+                            if(detail.state!=="success")
+                                window.location.href="error";
+                            detail=detail.article;
+                            document.getElementById("detail_like").innerHTML="赞("+detail.likes+")";
+                            document.getElementById("detail_dislike").innerHTML="踩("+detail.dislikes+")";
+                        }
+                    });
+                }else if(feedback.message==="你已经赞过了。"){
+                    alert("你已经赞过了!");
+                }else{
+                    window.location.href="error";
+                }
+            }
+        });
+    }
+    function dislike(){
+        $.ajax({
+            method:"POST",
+            url:"dislike",
+            data:{
+                "_csrf":csrf,
+                "target":user,
+                "article":article
+            },
+            success:function(data){
+                let feedback=eval("("+data+")");
+                if(feedback.state==="success"){
+                    $.ajax({
+                        method:"POST",
+                        url:"getarticle",
+                        data:{
+                            "_csrf":csrf,
+                            "username":user,
+                            "article":article
+                        },
+                        success:function(data){
+                            data=data.replace(/\r\n/g,"<br />");
+                            var detail=eval("("+data+")");
+                            if(detail.state!=="success")
+                                window.location.href="error";
+                            detail=detail.article;
+                            document.getElementById("detail_like").innerHTML="赞("+detail.likes+")";
+                            document.getElementById("detail_dislike").innerHTML="踩("+detail.dislikes+")";
+                        }
+                    });
+                }else if(feedback.message==="你已经踩过了。"){
+                    alert("你已经踩过了!");
+                }else{
+                    window.location.href="error";
+                }
+            }
+        });
+    }
+    function del(){
+        if(username!==user&&username!=="admin")
+            window.location.href="error";
+        if(confirm("确定删除该文章?"))
+            $.ajax({
+                method:"POST",
+                url:"deletearticle",
+                data:{
+                    "_csrf":csrf,
+                    "target":user,
+                    "article":article
+                },
+                success:function(data){
+                    let feedback=eval("("+data+")");
+                    if(feedback.state!=="success")
+                        window.location.href="error";
+                    window.location.href="blog?deleted&type=list";
+                }
+            });
+    }
+    function modify(){
+        if(username!==user)
+            window.location.href="error";
+        window.location.href="edit?article="+article;
+    }
+</script>
+</body>
+</html>

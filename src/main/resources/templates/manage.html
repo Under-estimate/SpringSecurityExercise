@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理界面</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="Shortcut Icon" href="https://s1.ax1x.com/2020/03/27/GPH9xO.png" type="image/png" />
+    <!--[if lt IE 9]>
+    <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+        .card{
+            border-radius: 50px;
+            background: #ffffff;
+            box-shadow:  20px 20px 50px #adadad,
+            -20px -20px 50px #ffffff;
+            margin:20px;
+            padding:20px;
+        }
+        a.title{
+            text-decoration: none;
+        }
+        a.title:link{
+            color:black;
+        }
+        a.title:visited{
+            color:black;
+        }
+        a.title:hover{
+            color:blue;
+        }
+        a.title:active{
+            color:cyan;
+        }
+    </style>
+</head>
+<body style="margin-top:50px;">
+<div class="container">
+    <form style="display:none;" method="post" th:action="@{/getcurrentusername}">
+        <input type="submit" value="_"/>
+    </form>
+    <div class="card">
+        <h3>自动更新管理面板</h3>
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissable">
+            上传失败。
+            <button type="button" class="close" data-dismiss="alert"
+                    aria-hidden="true">
+                &times;
+            </button>
+        </div>
+        <div th:if="${param.success}" class="alert alert-success alert-dismissable">
+            文件上传成功！
+            <button type="button" class="close" data-dismiss="alert"
+                    aria-hidden="true">
+                &times;
+            </button>
+        </div>
+        <form class="form-horizontal" th:action="@{/uploadUpdate}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="app"></label>
+                <input id="app" type="text" name="app" class="form-control" placeholder="应用名称" />
+            </div>
+            <div class="form-group">
+                <label for="file"></label>
+                <input id="file" type="file" name="file" class="form-control" placeholder="选择文件" />
+            </div>
+            <div class="form-group">
+                <input id="submit" type="submit" name="submit" class="form-control" placeholder="确认上传" />
+            </div>
+        </form>
+    </div>
+    <div class="card">
+        <h3>博客管理&nbsp;-&nbsp;用户列表</h3>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>用户名</th>
+                    <th>文章数</th>
+                    <th>动作</th>
+                </tr>
+            </thead>
+            <tbody id="list">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    let csrf=document.getElementsByName("_csrf")[0].value;
+    var username;
+    $.ajax({
+        method:"POST",
+        url:"getcurrentusername",
+        data:{
+            "_csrf":csrf
+        },
+        success:function(data){
+            username=data;
+            if(data!=="admin")
+                window.location.href="error";
+            $.ajax({
+                method:"POST",
+                url:"getalluser",
+                data:{
+                    "_csrf":csrf
+                },
+                success:function(data){
+                    let list=eval("("+data+")");
+                    if(list.state!=="success")
+                        window.location.href="error";
+                    list=list.users;
+                    var htmlcode=""
+                    for(num in list){
+                        u=list[num];
+                        htmlcode+="<tr>" +
+                            "<th><a class='title' href='blog?type=user&user="+u.username+"'>"+u.username+"</a></th>" +
+                            "<th>"+u.articles+"</th>" +
+                            "<th><button class='btn btn-danger' onclick=del("+u.username+")>删除用户</button></th>" +
+                            "</tr>"
+                    }
+                    document.getElementById("list").innerHTML=htmlcode;
+                }
+            })
+        }
+    });
+    function del(user){
+        if(username!=="admin")
+            window.location.href="error";
+        if(confirm("确认删除此用户?"))
+        $.ajax({
+            method:"POST",
+            url:"deleteuser",
+            data:{
+                "_csrf":csrf,
+                "username":user
+            },
+            success:function(data){
+                let feedback=eval("("+data+")");
+                if(feedback.state!=="success")
+                    window.location.href="error";
+                alert("删除成功");
+                location.reload();
+            }
+        })
+    }
+</script>
+</body>
+</html>
