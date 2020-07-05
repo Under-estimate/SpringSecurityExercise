@@ -159,7 +159,7 @@ public class BlogManagement {
             return err_permission_denied;
         if(!Utils.users.containsKey(username))
             return err_user_not_exist;
-        Utils.users.remove(username);
+        Utils.removeUser(username);
         Utils.saveUsers();
         return "{\"state\":\"success\"}";
     }

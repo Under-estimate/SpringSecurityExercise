@@ -121,7 +121,7 @@
                         htmlcode+="<tr>" +
                             "<th><a class='title' href='blog?type=user&user="+u.username+"'>"+u.username+"</a></th>" +
                             "<th>"+u.articles+"</th>" +
-                            "<th><button class='btn btn-danger' onclick=del("+u.username+")>删除用户</button></th>" +
+                            "<th><button class='btn btn-danger' onclick=del('"+u.username+"')>删除用户</button></th>" +
                             "</tr>"
                     }
                     document.getElementById("list").innerHTML=htmlcode;

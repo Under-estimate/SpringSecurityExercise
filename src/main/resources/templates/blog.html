@@ -104,7 +104,9 @@
             加载中...
         </div>
         <div id="detail_author_toolbar">
-            <button class="btn btn-primary" onclick="modify()">修改</button>
+            <div id="detail_author_toolbar_modify">
+                <button class="btn btn-primary" onclick="modify()">修改</button>
+            </div>
             <button class="btn btn-danger" onclick="del()">删除</button>
         </div>
         <p id="detail_body">
@@ -146,7 +148,7 @@
         if(nextPar !== -1){
             get_par = get_par.slice(0, nextPar);
         }
-        return get_par;
+        return window.decodeURI(get_par);
     }
     var user,article;
     function loadContent(){
@@ -186,6 +188,8 @@
                 window.location.href="error";
             if(user!==username&&username!=="admin")
                 document.getElementById("detail_author_toolbar").innerHTML="";
+            if(username==="admin")
+                document.getElementById("detail_author_toolbar_modify").innerHTML="";
             if(getPar("article"))
                 article=getPar("article");
             else

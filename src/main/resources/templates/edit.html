@@ -46,7 +46,7 @@
             if(nextPar !== -1){
                 get_par = get_par.slice(0, nextPar);
             }
-            return get_par;
+            return window.decodeURI(get_par);
         }
         if(getPar("article")){
             let csrf=document.getElementsByName("_csrf")[0].value;
